@@ -1,0 +1,71 @@
+/*
+Design a data structure that supports adding new words and finding if a string matches any previously added string.
+
+Implement the WordDictionary class:
+
+WordDictionary() Initializes the object.
+void addWord(word) Adds word to the data structure, it can be matched later.
+bool search(word) Returns true if there is any string in the data structure that matches word or false otherwise. word may contain dots '.' where dots can be matched with any letter.
+*/
+
+class WordDictionary {
+    struct Trie{
+        bool eow;
+        struct Trie* children[26];
+    };
+    struct Trie* root;
+    struct Trie* getNode(){
+        struct Trie* node= new Trie;
+        node->eow=false;
+        for(int i=0; i<26; i++) node->children[i]=NULL;
+        return node;
+    }
+    bool search_trie(struct Trie* root, string word){
+        struct Trie* temp=root;
+        for(int i=0; i<word.length(); i++){
+            if(word[i]=='.'){
+                for(int j=0; j<26; j++){
+                    if(temp->children[j]){
+                        if(search_trie(temp->children[j], word.substr(i+1, word.length()-i-1))==true) return true;
+                        else continue;
+                    }
+                }
+            }
+            int index=word[i]-'a';
+            if(index<0) return false;
+            if(!temp->children[index]) return false;
+            temp=temp->children[index];
+        }
+        return temp->eow;
+    }
+    void insert(struct Trie* root, string word){
+        struct Trie* temp=root;
+        for(int i=0; i<word.length(); i++){
+            int index=word[i]-'a';
+            if(!temp->children[index]) temp->children[index]=getNode();
+            temp=temp->children[index];
+        }
+        temp->eow=true;
+    }
+
+public:
+    WordDictionary() {
+        root=getNode();
+    }
+    
+    void addWord(string word) {
+        insert(root, word);
+    }
+    
+    bool search(string word) {
+        //cout<<word<<endl;
+        return search_trie(root, word);
+    }
+};
+
+/**
+ * Your WordDictionary object will be instantiated and called as such:
+ * WordDictionary* obj = new WordDictionary();
+ * obj->addWord(word);
+ * bool param_2 = obj->search(word);
+ */
